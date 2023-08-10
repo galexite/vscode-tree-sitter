@@ -5,3 +5,5 @@
 tslint.json
 tsconfig.json
 scripts/**
+Examples/**
+
