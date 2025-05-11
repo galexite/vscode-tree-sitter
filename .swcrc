@@ -1,0 +1,22 @@
+{
+  "module": {
+    "type": "commonjs",
+    "strictMode": true,
+    "noInterop": true
+  },
+  "jsc": {
+    "externalHelpers": false,
+    "target": "es2021",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "decorators": false,
+      "dynamicImport": true
+    },
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": false
+    },
+    "keepClassNames": true
+  }
+}

@@ -1,43 +1,31 @@
-import * as vscode from 'vscode';
-import * as parser from 'web-tree-sitter';
-import * as jsonc from 'jsonc-parser';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as vscode from "vscode";
+import * as wts from "web-tree-sitter";
+import * as jsonc from "jsonc-parser";
+import * as fs from "fs";
+import * as path from "path";
+import { GRAMMARS_DIR, PARSERS_DIR } from "./util";
 
-import { getNodeType } from './common';
+export type Term = { term: string; range: vscode.Range };
 
-// Grammar class
-const parserPromise = parser.init();
+interface GrammarJSON {
+  simpleTerms: { [sym: string]: string };
+  complexTerms: string[];
+  complexScopes: { [sym: string]: string };
+}
+
+const INSTANCES = new Map<string, Grammar>();
 
 export class Grammar {
-  // Parser
-  parser: parser | undefined;
-
-  // Grammar
-  readonly simpleTerms: { [sym: string]: string } = {};
-  readonly complexTerms: string[] = [];
-  readonly complexScopes: { [sym: string]: string } = {};
   readonly complexDepth: number = 0;
   readonly complexOrder: boolean = false;
 
   // Constructor
-  constructor(private lang: string) {
-    // Parse grammar file
-    const grammarFile = __dirname + "/../grammars/" + lang + ".json";
-    const grammarJson = jsonc.parse(fs.readFileSync(grammarFile).toString());
-
-    for (const t in grammarJson.simpleTerms) {
-      this.simpleTerms[t] = grammarJson.simpleTerms[t];
-    }
-
-    for (const t in grammarJson.complexTerms) {
-      this.complexTerms[t as never] = grammarJson.complexTerms[t];
-    }
-
-    for (const t in grammarJson.complexScopes) {
-      this.complexScopes[t] = grammarJson.complexScopes[t];
-    }
-
+  constructor(
+    private readonly parser: wts.Parser,
+    readonly simpleTerms: GrammarJSON["simpleTerms"],
+    readonly complexTerms: GrammarJSON["complexTerms"],
+    readonly complexScopes: GrammarJSON["complexScopes"],
+  ) {
     for (const s in this.complexScopes) {
       const depth = s.split(">").length;
 
@@ -53,27 +41,46 @@ export class Grammar {
     this.complexDepth--;
   }
 
-  // Parser initialization
-  async init() {
-    // Load wasm parser
-    await parserPromise;
-    this.parser = new parser();
-    const langFile = path.join(__dirname, "../parsers", this.lang + ".wasm");
-    const langObj = await parser.Language.load(langFile);
-    this.parser.setLanguage(langObj);
+  private static async create(languageName: string): Promise<Grammar> {
+    const parser = new wts.Parser();
+    const languageFile = path.join(PARSERS_DIR, `${languageName}.wasm`);
+    const language = await wts.Language.load(languageFile);
+    parser.setLanguage(language);
+
+    const grammarFile = path.join(GRAMMARS_DIR, `${languageName}.json`);
+
+    const grammarJson = jsonc.parse(
+      fs.readFileSync(grammarFile, { encoding: "utf-8" }),
+    ) as GrammarJSON;
+
+    return new Grammar(
+      parser,
+      grammarJson.simpleTerms,
+      grammarJson.complexTerms,
+      grammarJson.complexScopes,
+    );
+  }
+
+  static async getOrCreate(languageName: string): Promise<Grammar> {
+    let instance = INSTANCES.get(languageName);
+    if (!instance) {
+      instance = await Grammar.create(languageName);
+      INSTANCES.set(languageName, instance);
+    }
+    return instance;
   }
 
   // Build syntax tree
-  tree(doc: string) {
-    return this.parser!.parse(doc);
+  tree(doc: string): wts.Tree | null {
+    return this.parser.parse(doc);
   }
 
   // Parse syntax tree
-  parse(tree: parser.Tree) {
+  parse(tree: wts.Tree): Term[] {
     // Travel tree and peek terms
-    const terms: { term: string; range: vscode.Range }[] = [];
-    const stack: parser.SyntaxNode[] = [];
-    let node = tree.rootNode.firstChild as parser.SyntaxNode | null | undefined;
+    const terms: Term[] = [];
+    const stack: wts.Node[] = [];
+    let node = tree.rootNode.firstChild;
 
     while (stack.length > 0 || node) {
       // Go deeper
@@ -136,7 +143,8 @@ export class Grammar {
               orderScopes.push(
                 scopes[i],
                 `${scopes[i]}[${index}]`,
-                `${scopes[i]}[${rindex}]`);
+                `${scopes[i]}[${rindex}]`,
+              );
             }
 
             scopes = orderScopes;
@@ -157,10 +165,13 @@ export class Grammar {
             range: new vscode.Range(
               new vscode.Position(
                 node.startPosition.row,
-                node.startPosition.column),
+                node.startPosition.column,
+              ),
               new vscode.Position(
                 node.endPosition.row,
-                node.endPosition.column)),
+                node.endPosition.column,
+              ),
+            ),
           });
         }
         // Go right
@@ -170,4 +181,14 @@ export class Grammar {
 
     return terms;
   }
+}
+
+export function getNodeType(node: wts.Node): string {
+  let type = node.type;
+
+  if (!node.isNamed) {
+    type = `"${type}"`;
+  }
+
+  return type;
 }

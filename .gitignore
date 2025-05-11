@@ -1,4 +1,4 @@
-node_modules
-parsers
-out
-pnpm-lock.yaml
+node_modules/
+parsers/
+dist/
+*.vsix

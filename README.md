@@ -1,30 +1,34 @@
 # Syntax Highlighter for VSCode
 
 #### Syntax highlighter based on [Tree-Sitter](https://tree-sitter.github.io/tree-sitter/).
+
 #### Languages:
+
 #### C++, C, Python, TypeScript, TypeScriptReact, JavaScript,
+
 #### Go, Rust, Php, Ruby, ShellScript, Bash, OCaml, Lua, C#, D
 
 ![demo](images/demo.gif)
 
 #### Languages:
-* C++
-* C
-* C#
-* D
-* Python
-* TypeScript
-* TypeScriptReact
-* JavaScript
-* Go
-* Rust
-* Php
-* Ruby
-* ShellScript
-* Bash
-* OCaml
-* Lua
-* More to come...
+
+- C++
+- C
+- C#
+- D
+- Python
+- TypeScript
+- TypeScriptReact
+- JavaScript
+- Go
+- Rust
+- Php
+- Ruby
+- ShellScript
+- Bash
+- OCaml
+- Lua
+- More to come...
 
 ## Description
 
@@ -91,29 +95,32 @@ If no color is assigned to a semantic token by a theme, the VSCode uses the
 [Semantic Token Scope Map](https://code.visualstudio.com/api/language-extensions/semantic-highlight-guide#semantic-token-scope-map).
 
 {Syntax Highlighter} provides the next tokens:
-* **type** - types (class, struct, enum)
-* **namespace** - scopes (namespace, module, outer class)
-* **function** - functions (function, method, interface)
-* **variable** - variables (variable, property, member)
-* **number** - number literals (10, 10.0f, 0x10)
-* **string** - string literals (string, regex, char)
-* **comment** - comments
-* **variable.readonly.defaultLibrary** - language constants (true, nullptr, nil)
-* **macro** - directives (#include, import, use)
-* **keyword** - control keywords (if, continue, return)
-* **operator** - operators (&&, +=, ->)
-* **type.modification** - modifiers (const, public, override)
-* **punctuation** - punctuation symbols (., :, {)
+
+- **type** - types (class, struct, enum)
+- **namespace** - scopes (namespace, module, outer class)
+- **function** - functions (function, method, interface)
+- **variable** - variables (variable, property, member)
+- **number** - number literals (10, 10.0f, 0x10)
+- **string** - string literals (string, regex, char)
+- **comment** - comments
+- **variable.readonly.defaultLibrary** - language constants (true, nullptr, nil)
+- **macro** - directives (#include, import, use)
+- **keyword** - control keywords (if, continue, return)
+- **operator** - operators (&&, +=, ->)
+- **type.modification** - modifiers (const, public, override)
+- **punctuation** - punctuation symbols (., :, {)
 
 **punctuation** is a custom (non-standard) token introduced by {Syntax Highlighter}.
-Its fallback TextMate scope is *"punctuation"*. The default fallback for
-**type.modification** is *"storage.modifier"*. Note that if you override **type**
+Its fallback TextMate scope is _"punctuation"_. The default fallback for
+**type.modification** is _"storage.modifier"_. Note that if you override **type**
 color you should also override **type.modification**. Otherwise, **type.modification**
 color will first fallback to a more general **type** instead of mapped TextMate scope.
 The same goes for **variable** and **variable.readonly.defaultLibrary**.
 
 ## Settings
+
 #### `syntax.highlightComment`
+
 Enable/disable highlighting of comments.
 
 This setting is useful, when you have other extensions, providing colorization within
@@ -122,18 +129,20 @@ Doxygen or Sphinx. To not overwrite their colorization you can disable highlight
 comments, putting `"syntax.highlightComment": false,` in your `settings.json`.
 
 #### `syntax.highlightTerms`
+
 List of enabled terms.
 
 If you want to disable {Syntax Highlighter} for certain terms and use standard
 coloring instead, just remove them from `syntax.highlightTerms` list in your
-`settings.json`. By default all [supported terms]((#customization)) are enabled.
+`settings.json`. By default all [supported terms](<(#customization)>) are enabled.
 
 #### `syntax.highlightLanguages`
+
 List of enabled languages.
 
 If you want to disable {Syntax Highlighter} for certain languages and use standard
 coloring instead, just remove them from `syntax.highlightLanguages` list in your
-`settings.json`. By default all [supported languages]((#languages)) are enabled.
+`settings.json`. By default all [supported languages](<(#languages)>) are enabled.
 
 ## [Build](BUILD.md)
 

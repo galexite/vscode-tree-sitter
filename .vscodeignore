@@ -1,9 +1,8 @@
-**/*.ts
-**/*.map
-.vscode/**
-.gitignore
-tslint.json
-tsconfig.json
-scripts/**
-Examples/**
-
+**/*
+!LICENSE
+!README.md
+!package.json
+!dist/
+!node_modules/
+!grammars/*.json
+!parsers/*.wasm
